@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import 'package:travel_planner/models/trip.dart';
 
 class NewTripDialog extends StatefulWidget {
@@ -13,7 +15,6 @@ class NewTripDialog extends StatefulWidget {
     required this.selectedTrip,
     required this.dates,
     required this.onTripAdded,
-    required List<Trip> fulltrip,
   });
 
   @override
@@ -24,6 +25,78 @@ class _NewTripDialogState extends State<NewTripDialog> {
   String? selectedLocation;
   DateTimeRange? selectedDateRange;
 
+  Future<void> _saveTrip() async {
+    try {
+      print('Save Trip Button Pressed');
+
+      if (selectedLocation != null && selectedDateRange != null) {
+        print('Valid Input: $selectedLocation, $selectedDateRange');
+
+        final url = Uri.https(
+          'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+          'trips.json',
+        );
+
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'place': selectedLocation,
+            'startDate': selectedDateRange!.start.toIso8601String(),
+            'endDate': selectedDateRange!.end.toIso8601String(),
+          }),
+        );
+
+        print('Response Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          print('Trip saved successfully');
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Trip saved successfully')),
+          );
+
+          String id = json.decode(response.body)['name'];
+
+          Trip newTrip = Trip(
+            id: id,
+            place: selectedLocation!,
+            startDate: selectedDateRange!.start,
+            endDate: selectedDateRange!.end,
+            duration: selectedDateRange!.end
+                .difference(selectedDateRange!.start)
+                .inDays,
+          );
+
+          widget.selectedTrip[id] = false;
+          widget.dates[id] = selectedDateRange!.start;
+
+          widget.onTripAdded(newTrip);
+
+          Navigator.of(context).pop();
+        } else {
+          print('Error: ${response.reasonPhrase}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save trip')),
+          );
+        }
+      } else {
+        print('Invalid Input: $selectedLocation, $selectedDateRange');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please provide valid input')),
+        );
+      }
+    } catch (error) {
+      print('Exception: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -33,6 +106,7 @@ class _NewTripDialogState extends State<NewTripDialog> {
           DropdownButtonFormField<String>(
             value: selectedLocation,
             onChanged: (value) {
+              print('Selected Location: $value');
               setState(() {
                 selectedLocation = value;
               });
@@ -54,6 +128,7 @@ class _NewTripDialogState extends State<NewTripDialog> {
               );
 
               if (picked != null) {
+                print('Selected date range: $picked');
                 setState(() {
                   selectedDateRange = picked;
                 });
@@ -77,7 +152,7 @@ class _NewTripDialogState extends State<NewTripDialog> {
         ),
         TextButton(
           onPressed: () {
-            _submitNewTrip();
+            _saveTrip();
           },
           child: Text('Submit'),
         ),
@@ -110,32 +185,5 @@ class _NewTripDialogState extends State<NewTripDialog> {
         child: Text(location),
       );
     }).toList();
-  }
-
-  void _submitNewTrip() {
-    if (selectedLocation != null && selectedDateRange != null) {
-      String id = DateTime.now().toString();
-      int duration =
-          selectedDateRange!.end.difference(selectedDateRange!.start).inDays;
-
-      Trip newTrip = Trip(
-        id: id,
-        place: selectedLocation!,
-        startDate: selectedDateRange!.start,
-        endDate: selectedDateRange!.end,
-        duration: duration,
-      );
-
-      widget.selectedTrip[id] = false;
-      widget.dates[id] = selectedDateRange!.start;
-
-      widget.onTripAdded(newTrip);
-
-      Navigator.of(context).pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all details')),
-      );
-    }
   }
 }

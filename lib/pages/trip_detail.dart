@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:travel_planner/models/full_trip.dart';
 import 'package:travel_planner/models/trip.dart';
@@ -32,6 +34,54 @@ class _TripDetailPageState extends State<TripDetailPage> {
       destinationController.add(TextEditingController());
       foodController.add(TextEditingController());
       costController.add(TextEditingController());
+    }
+
+    // Load details from the database
+    _loadDetails();
+  }
+
+  Future<void> _loadDetails() async {
+    try {
+      final url = Uri.https(
+        'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'trip_details/${widget.trip.id}.json',
+      );
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        for (int index = 0; index < placeController.length; index++) {
+          if (data.containsKey('$index')) {
+            final detail = data['$index'];
+            widget.fulltrip.details.add(FullTrip(
+              placeToStay: detail['placeToStay'],
+              transportation: detail['transportation'],
+              destination: detail['destination'],
+              food: detail['food'],
+              cost: detail['cost'] ?? 0.0,
+            ));
+          }
+        }
+
+        // Set the text controllers with the loaded data
+        for (int index = 0; index < widget.fulltrip.details.length; index++) {
+          placeController[index].text =
+              widget.fulltrip.details[index].placeToStay;
+          transportationController[index].text =
+              widget.fulltrip.details[index].transportation;
+          destinationController[index].text =
+              widget.fulltrip.details[index].destination;
+          foodController[index].text = widget.fulltrip.details[index].food;
+          costController[index].text =
+              widget.fulltrip.details[index].cost.toString();
+        }
+      } else {
+        print('Error: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Exception: $error');
     }
   }
 
@@ -117,7 +167,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
     );
   }
 
-  void _saveChanges() {
+  void _saveChanges() async {
     // Ensure details property is initialized as a List
     for (int index = 0; index < costController.length; index++) {
       widget.fulltrip.details.add(FullTrip(
@@ -129,7 +179,8 @@ class _TripDetailPageState extends State<TripDetailPage> {
       ));
     }
 
-    // Perform any additional save logic if needed
+    // Save details to the database
+    await _saveDetails();
 
     // Display a message or navigate to a different screen
     ScaffoldMessenger.of(context).showSnackBar(
@@ -137,6 +188,41 @@ class _TripDetailPageState extends State<TripDetailPage> {
         content: Text('Details saved successfully!'),
       ),
     );
+  }
+
+  Future<void> _saveDetails() async {
+    try {
+      final url = Uri.https(
+        'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'trip_details/${widget.trip.id}.json',
+      );
+
+      final Map<String, dynamic> detailsData = {};
+
+      for (int index = 0; index < widget.fulltrip.details.length; index++) {
+        detailsData['$index'] = {
+          'placeToStay': widget.fulltrip.details[index].placeToStay,
+          'transportation': widget.fulltrip.details[index].transportation,
+          'destination': widget.fulltrip.details[index].destination,
+          'food': widget.fulltrip.details[index].food,
+          'cost': widget.fulltrip.details[index].cost,
+        };
+      }
+
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(detailsData),
+      );
+
+      if (response.statusCode != 200) {
+        print('Error: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Exception: $error');
+    }
   }
 
   void _deleteTrip() {
@@ -154,8 +240,9 @@ class _TripDetailPageState extends State<TripDetailPage> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 // Perform deletion logic
+                await _deleteDetails();
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: Text('Delete'),
@@ -164,5 +251,22 @@ class _TripDetailPageState extends State<TripDetailPage> {
         );
       },
     );
+  }
+
+  Future<void> _deleteDetails() async {
+    try {
+      final url = Uri.https(
+        'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'trip_details/${widget.trip.id}.json',
+      );
+
+      final response = await http.delete(url);
+
+      if (response.statusCode != 200) {
+        print('Error: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Exception: $error');
+    }
   }
 }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'dart:convert';
 import 'package:travel_planner/models/full_trip.dart';
 import 'package:travel_planner/pages/places_preview.dart';
 import 'package:travel_planner/pages/qna.dart';
+import 'package:travel_planner/pages/sign_in.dart';
 import 'package:travel_planner/pages/trip_detail.dart';
 import 'package:travel_planner/widgets/custom_icon_button.dart';
 import 'package:travel_planner/models/trip.dart';
-import 'package:intl/intl.dart';
-//import 'package:travel_planner/models/user.dart';
 import 'package:travel_planner/pages/new_trip.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,8 +20,55 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Trip> _trips = [];
-  Map<String, bool> _selectedTrip = {};
-  Map<String, DateTime> _dates = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTrips(); // Fetch trips when the widget is initialized
+  }
+
+  Future<void> _fetchTrips() async {
+    try {
+      final url = Uri.https(
+        'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'trips.json',
+      );
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = json.decode(response.body);
+
+        if (data != null) {
+          List<Trip> trips = [];
+
+          data.forEach((key, value) {
+            DateTime startDate = DateTime.parse(value['startDate']);
+            DateTime endDate = DateTime.parse(value['endDate']);
+
+            // Calculate duration in days
+            int duration = endDate.difference(startDate).inDays;
+
+            trips.add(Trip(
+              id: key,
+              place: value['place'],
+              startDate: startDate,
+              endDate: endDate,
+              duration: duration,
+            ));
+          });
+
+          setState(() {
+            _trips = trips;
+          });
+        }
+      } else {
+        print('Error: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Exception: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +85,12 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           CustomIconButton(
-            icon: Icon(Ionicons.search_outline),
+            icon: Icon(Icons.search),
           ),
           Padding(
             padding: EdgeInsets.only(left: 8.0, right: 12),
             child: CustomIconButton(
-              icon: Icon(Ionicons.notifications_outline),
+              icon: Icon(Icons.notifications),
             ),
           ),
         ],
@@ -143,8 +191,7 @@ class _HomePageState extends State<HomePage> {
             leading: Icon(Icons.logout),
             title: Text('Logout'),
             onTap: () {
-              // Implement logout logic here
-              Navigator.pop(context); // Close the drawer
+              _logout();
             },
           ),
         ],
@@ -162,12 +209,32 @@ class _HomePageState extends State<HomePage> {
               _trips.add(newTrip);
             });
           },
-          fulltrip: _trips,
-          selectedTrip: _selectedTrip,
-          dates: _dates,
+          selectedTrip: {},
+          dates: {},
           trips: [],
         );
       },
+    );
+  }
+
+  void _logout() {
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => LoginPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+      ),
+      (route) => false, // Prevent going back to the previous screen
     );
   }
 }

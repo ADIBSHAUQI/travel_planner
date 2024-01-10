@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "462983817829",
+    "firebase_url": "https://tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "tabii-d8716",
+    "storage_bucket": "tabii-d8716.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462983817829:android:3f2bb3fe340aeaac76748c",
+        "android_client_info": {
+          "package_name": "com.example.travel_planner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmAHnz8WDoDlrEko44JKkyDT8jIRbqcVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
