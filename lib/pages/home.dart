@@ -79,20 +79,9 @@ class _HomePageState extends State<HomePage> {
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Hello"),
+            Text("TABII"),
           ],
         ),
-        actions: [
-          CustomIconButton(
-            icon: Icon(Icons.search),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 8.0, right: 12),
-            child: CustomIconButton(
-              icon: Icon(Icons.notifications),
-            ),
-          ),
-        ],
       ),
       drawer: _buildDrawer(),
       body: ListView.builder(

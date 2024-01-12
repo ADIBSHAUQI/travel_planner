@@ -43,20 +43,6 @@ class PlacesPreviewPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Places Preview'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // Handle search action
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notifications action
-            },
-          ),
-        ],
       ),
       drawer: _buildDrawer(context),
       body: GridView.builder(

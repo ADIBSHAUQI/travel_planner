@@ -21,40 +21,10 @@ class TripDetailPage extends StatefulWidget {
 }
 
 class _TripDetailPageState extends State<TripDetailPage> {
-  List<TextEditingController> placeController = [];
-  List<TextEditingController> transportationController = [];
-  List<TextEditingController> destinationController = [];
-  List<TextEditingController> foodController = [];
-  List<TextEditingController> costController = [];
-
   @override
   void initState() {
     super.initState();
-    widget.fulltrip.details = [];
-
-    int numberOfDays =
-        widget.trip.endDate.difference(widget.trip.startDate).inDays + 1;
-    for (var i = 0; i < numberOfDays; i++) {
-      placeController.add(TextEditingController());
-      transportationController.add(TextEditingController());
-      destinationController.add(TextEditingController());
-      foodController.add(TextEditingController());
-      costController.add(TextEditingController());
-    }
-
-    _loadDetails().then((_) {
-      for (int index = 0; index < widget.fulltrip.details.length; index++) {
-        placeController[index].text =
-            widget.fulltrip.details[index].placeToStay;
-        transportationController[index].text =
-            widget.fulltrip.details[index].transportation;
-        destinationController[index].text =
-            widget.fulltrip.details[index].destination;
-        foodController[index].text = widget.fulltrip.details[index].food;
-        costController[index].text =
-            widget.fulltrip.details[index].cost.toString();
-      }
-    });
+    _loadDetails();
   }
 
   Future<void> _loadDetails() async {
@@ -67,39 +37,38 @@ class _TripDetailPageState extends State<TripDetailPage> {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> data = json.decode(response.body);
 
-        for (int index = 0; index < placeController.length; index++) {
-          if (data.containsKey('$index')) {
-            final detail = data['$index'];
-            widget.fulltrip.details.add(FullTrip(
-              placeToStay: detail['placeToStay'],
-              transportation: detail['transportation'],
-              destination: detail['destination'],
-              food: detail['food'],
-              cost: detail['cost'] ?? 0.0,
-            ));
-          }
+        for (int index = 0; index < data.length; index++) {
+          final detail = data[index];
+          widget.fulltrip.details.add(FullTrip(
+            placeToStay: detail['placeToStay'],
+            transportation: detail['transportation'],
+            destination: detail['destination'],
+            food: detail['food'],
+            cost: detail['cost'] ?? 0.0,
+          ));
         }
 
-        // Set the text controllers with the loaded data
-        for (int index = 0; index < widget.fulltrip.details.length; index++) {
-          placeController[index].text =
-              widget.fulltrip.details[index].placeToStay;
-          transportationController[index].text =
-              widget.fulltrip.details[index].transportation;
-          destinationController[index].text =
-              widget.fulltrip.details[index].destination;
-          foodController[index].text = widget.fulltrip.details[index].food;
-          costController[index].text =
-              widget.fulltrip.details[index].cost.toString();
-        }
+        setState(() {}); // Trigger a rebuild to display the loaded data
       } else {
         print('Error: ${response.reasonPhrase}');
       }
     } catch (error) {
       print('Exception: $error');
     }
+  }
+
+  Widget _buildListTile({
+    required String title,
+    required String data,
+    required int index,
+  }) {
+    return ListTile(
+      title: Text(title),
+      subtitle: Text(data),
+      onTap: () => _editDetails(title, index),
+    );
   }
 
   @override
@@ -128,104 +97,40 @@ class _TripDetailPageState extends State<TripDetailPage> {
           itemBuilder: (context, index) {
             final currentDate =
                 widget.trip.startDate.add(Duration(days: index));
+            final fullTrip = widget.fulltrip.details.length > index
+                ? widget.fulltrip.details[index]
+                : FullTrip(
+                    placeToStay: '',
+                    transportation: '',
+                    destination: '',
+                    food: '',
+                    cost: 0.0,
+                  );
+
             return Card(
               child: ListTile(
                 title: Text(DateFormat.yMMMd().format(currentDate)),
-                subtitle: Row(
+                subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Left side text
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Place to stay:'),
-                        Divider(),
-                        Text('Transportation:'),
-                        Divider(),
-                        Text('Destination:'),
-                        Divider(),
-                        Text('Food:'),
-                        Divider(),
-                        Text('Cost:'),
-                        Divider(),
-                      ],
-                    ),
-                    // Right side EditableText
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 130,
-                          height: 30,
-                          child: EditableText(
-                            controller: placeController[index],
-                            readOnly: false,
-                            focusNode: FocusNode(),
-                            cursorColor: Colors.black,
-                            backgroundCursorColor: Colors.black,
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
-                            maxLines: 2,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 130,
-                          height: 30,
-                          child: EditableText(
-                            controller: transportationController[index],
-                            readOnly: false,
-                            focusNode: FocusNode(),
-                            cursorColor: Colors.black,
-                            backgroundCursorColor: Colors.black,
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
-                            maxLines: 2,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 130,
-                          height: 30,
-                          child: EditableText(
-                            controller: destinationController[index],
-                            readOnly: false,
-                            focusNode: FocusNode(),
-                            cursorColor: Colors.black,
-                            backgroundCursorColor: Colors.black,
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
-                            maxLines: 2,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 130,
-                          height: 30,
-                          child: EditableText(
-                            controller: foodController[index],
-                            readOnly: false,
-                            focusNode: FocusNode(),
-                            cursorColor: Colors.black,
-                            backgroundCursorColor: Colors.black,
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
-                            maxLines: 2,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 130,
-                          height: 30,
-                          child: EditableText(
-                            controller: costController[index],
-                            readOnly: false,
-                            focusNode: FocusNode(),
-                            cursorColor: Colors.black,
-                            backgroundCursorColor: Colors.black,
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
-                            maxLines: 2,
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildListTile(
+                        title: 'Place to stay',
+                        data: fullTrip.placeToStay,
+                        index: index),
+                    _buildListTile(
+                        title: 'Transportation',
+                        data: fullTrip.transportation,
+                        index: index),
+                    _buildListTile(
+                        title: 'Destination',
+                        data: fullTrip.destination,
+                        index: index),
+                    _buildListTile(
+                        title: 'Food', data: fullTrip.food, index: index),
+                    _buildListTile(
+                        title: 'Cost',
+                        data: fullTrip.cost.toString(),
+                        index: index),
                   ],
                 ),
               ),
@@ -236,15 +141,16 @@ class _TripDetailPageState extends State<TripDetailPage> {
     );
   }
 
-  void _editDetails(int index) {
+  void _editDetails(String title, int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        TextEditingController controller = TextEditingController();
         return AlertDialog(
-          title: Text('Edit Details'),
+          title: Text('Edit $title'),
           content: TextField(
-            controller: placeController[index],
-            decoration: InputDecoration(labelText: 'Place to stay'),
+            controller: controller,
+            decoration: InputDecoration(labelText: title),
           ),
           actions: <Widget>[
             TextButton(
@@ -255,8 +161,78 @@ class _TripDetailPageState extends State<TripDetailPage> {
             ),
             TextButton(
               onPressed: () {
+                setState(() {
+                  // Handle any additional logic for saving changes
+                  if (index < widget.fulltrip.details.length) {
+                    // Update the existing data
+                    switch (title) {
+                      case 'Place to stay':
+                        widget.fulltrip.details[index].placeToStay =
+                            controller.text;
+                        break;
+                      case 'Transportation':
+                        widget.fulltrip.details[index].transportation =
+                            controller.text;
+                        break;
+                      case 'Destination':
+                        widget.fulltrip.details[index].destination =
+                            controller.text;
+                        break;
+                      case 'Food':
+                        widget.fulltrip.details[index].food = controller.text;
+                        break;
+                      case 'Cost':
+                        widget.fulltrip.details[index].cost =
+                            double.parse(controller.text);
+                        break;
+                    }
+                  } else {
+                    // Add new data
+                    switch (title) {
+                      case 'Place to stay':
+                        widget.fulltrip.details.add(FullTrip(
+                            placeToStay: controller.text,
+                            transportation: '',
+                            destination: '',
+                            food: '',
+                            cost: 0.0));
+                        break;
+                      case 'Transportation':
+                        widget.fulltrip.details.add(FullTrip(
+                            placeToStay: '',
+                            transportation: controller.text,
+                            destination: '',
+                            food: '',
+                            cost: 0.0));
+                        break;
+                      case 'Destination':
+                        widget.fulltrip.details.add(FullTrip(
+                            placeToStay: '',
+                            transportation: '',
+                            destination: controller.text,
+                            food: '',
+                            cost: 0.0));
+                        break;
+                      case 'Food':
+                        widget.fulltrip.details.add(FullTrip(
+                            placeToStay: '',
+                            transportation: '',
+                            destination: '',
+                            food: controller.text,
+                            cost: 0.0));
+                        break;
+                      case 'Cost':
+                        widget.fulltrip.details.add(FullTrip(
+                            placeToStay: '',
+                            transportation: '',
+                            destination: '',
+                            food: '',
+                            cost: double.parse(controller.text)));
+                        break;
+                    }
+                  }
+                });
                 Navigator.of(context).pop();
-                // Handle any additional logic for saving changes
               },
               child: Text('Save'),
             ),
@@ -267,41 +243,6 @@ class _TripDetailPageState extends State<TripDetailPage> {
   }
 
   void _saveChanges() async {
-    // Ensure details property is initialized as a List
-    // for (int index = 0; index < costController.length; index++) {
-    //   widget.fulltrip.details.add(FullTrip(
-    //     placeToStay: placeController[index].text,
-    //     transportation: transportationController[index].text,
-    //     destination: destinationController[index].text,
-    //     food: foodController[index].text,
-    //     cost: double.parse(costController[index].text),
-    //   ));
-
-    // }
-    for (int index = 0; index < costController.length; index++) {
-      FullTrip newDetails = FullTrip(
-        placeToStay: placeController[index].text,
-        transportation: transportationController[index].text,
-        destination: destinationController[index].text,
-        food: foodController[index].text,
-        cost: double.parse(costController[index].text),
-      );
-
-      // Update or add the new details to the list
-      if (index < widget.fulltrip.details.length) {
-        widget.fulltrip.details[index] = newDetails;
-      } else {
-        widget.fulltrip.details.add(newDetails);
-      }
-
-      // Update the corresponding TextEditingController values
-      placeController[index].text = newDetails.placeToStay;
-      transportationController[index].text = newDetails.transportation;
-      destinationController[index].text = newDetails.destination;
-      foodController[index].text = newDetails.food;
-      costController[index].text = newDetails.cost.toString();
-    }
-
     // Save details to the database
     await _saveDetails();
 
@@ -320,16 +261,16 @@ class _TripDetailPageState extends State<TripDetailPage> {
         'trip_details/${widget.trip.id}.json',
       );
 
-      final Map<String, dynamic> detailsData = {};
+      final List<Map<String, dynamic>> detailsData = [];
 
       for (int index = 0; index < widget.fulltrip.details.length; index++) {
-        detailsData['$index'] = {
+        detailsData.add({
           'placeToStay': widget.fulltrip.details[index].placeToStay,
           'transportation': widget.fulltrip.details[index].transportation,
           'destination': widget.fulltrip.details[index].destination,
           'food': widget.fulltrip.details[index].food,
           'cost': widget.fulltrip.details[index].cost,
-        };
+        });
       }
 
       final response = await http.put(
@@ -398,21 +339,4 @@ class _TripDetailPageState extends State<TripDetailPage> {
     widget.onDelete(widget.trip.id);
     Navigator.of(context).pop(); // Close the dialog
   }
-
-  // Future<void> _deleteDetails() async {
-  //   try {
-  //     final url = Uri.https(
-  //       'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
-  //       'trip_details/${widget.trip.id}.json',
-  //     );
-
-  //     final response = await http.delete(url);
-
-  //     if (response.statusCode != 200) {
-  //       print('Error: ${response.reasonPhrase}');
-  //     }
-  //   } catch (error) {
-  //     print('Exception: $error');
-  //   }
-  // }
 }
