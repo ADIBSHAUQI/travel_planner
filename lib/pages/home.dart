@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchTrips(); // Fetch trips when the widget is initialized
+    _fetchTrips();
   }
 
   Future<void> _fetchTrips() async {
@@ -46,7 +46,6 @@ class _HomePageState extends State<HomePage> {
             DateTime startDate = DateTime.parse(value['startDate']);
             DateTime endDate = DateTime.parse(value['endDate']);
 
-            // Calculate duration in days
             int duration = endDate.difference(startDate).inDays;
 
             trips.add(Trip(
@@ -110,14 +109,18 @@ class _HomePageState extends State<HomePage> {
                   builder: (context) => TripDetailPage(
                     trip: trip,
                     fulltrip: FullTrip(
-                        placeToStay: '',
-                        transportation: '',
-                        destination: '',
-                        food: '',
-                        cost: 0.0),
+                      placeToStay: '',
+                      transportation: '',
+                      destination: '',
+                      food: '',
+                      cost: 0.0,
+                    ),
+                    onDelete: _handleTripDeletion,
                   ),
                 ),
-              );
+              ).then((result) {
+                // Handle any result if needed
+              });
             },
             child: ListTile(
               title: Text(
@@ -234,7 +237,36 @@ class _HomePageState extends State<HomePage> {
           return SlideTransition(position: offsetAnimation, child: child);
         },
       ),
-      (route) => false, // Prevent going back to the previous screen
+      (route) => false,
     );
+  }
+
+  // Function to delete trip data from the database
+  Future<void> _deleteTripData(String tripId) async {
+    try {
+      final url = Uri.https(
+        'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'trips/$tripId.json',
+      );
+
+      final response = await http.delete(url);
+
+      if (response.statusCode != 200) {
+        print('Error deleting trip data: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Exception deleting trip data: $error');
+    }
+  }
+
+  // Function to handle trip deletion
+  void _handleTripDeletion(String tripId) async {
+    // Delete data from the database
+    await _deleteTripData(tripId);
+
+    // Update the local list
+    setState(() {
+      _trips.removeWhere((trip) => trip.id == tripId);
+    });
   }
 }

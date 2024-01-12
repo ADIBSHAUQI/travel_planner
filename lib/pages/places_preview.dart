@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:travel_planner/pages/home.dart';
 import 'package:travel_planner/pages/qna.dart';
+import 'package:travel_planner/pages/sign_in.dart';
 
 class PlacesPreviewPage extends StatelessWidget {
   final List<String> placeCategories = [
@@ -137,8 +138,7 @@ class PlacesPreviewPage extends StatelessWidget {
             leading: Icon(Icons.logout),
             title: Text('Logout'),
             onTap: () {
-              // Implement logout logic here
-              Navigator.pop(context); // Close the drawer
+              _logout(context);
             },
           ),
         ],
@@ -153,6 +153,27 @@ class PlacesPreviewPage extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => PlaceListPage(category: category),
       ),
+    );
+  }
+
+  void _logout(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => LoginPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+      ),
+      (route) => false,
     );
   }
 }

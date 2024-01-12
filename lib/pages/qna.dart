@@ -1,201 +1,11 @@
-// import 'package:flutter/material.dart';
-// import 'package:travel_planner/models/qna_info.dart';
-// import 'package:travel_planner/pages/home.dart';
-// import 'package:travel_planner/pages/places_preview.dart';
-
-// class QnaPage extends StatefulWidget {
-//   @override
-//   _QnaPageState createState() => _QnaPageState();
-// }
-
-// class _QnaPageState extends State<QnaPage> {
-//   List<QnA> qnaList = [];
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('QnA'),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.add),
-//             onPressed: _addQuestion,
-//           ),
-//         ],
-//       ),
-//       drawer: _buildDrawer(context),
-//       body: _buildQnAList(),
-//       bottomNavigationBar: BottomAppBar(
-//         shape: CircularNotchedRectangle(),
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceAround,
-//           children: [
-//             IconButton(
-//               icon: Icon(Icons.home),
-//               onPressed: () {
-//                 Navigator.push(
-//                   context,
-//                   MaterialPageRoute(builder: (context) => HomePage()),
-//                 );
-//               },
-//             ),
-//             IconButton(
-//               icon: Icon(Icons.place),
-//               onPressed: () {
-//                 Navigator.push(
-//                   context,
-//                   MaterialPageRoute(builder: (context) => PlacesPreviewPage()),
-//                 );
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildQnAList() {
-//     return ListView.builder(
-//       itemCount: qnaList.length,
-//       itemBuilder: (context, index) {
-//         return Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             ListTile(
-//               title: Text(qnaList[index].question),
-//               subtitle: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: qnaList[index]
-//                     .answers
-//                     .map((answer) => Text(answer))
-//                     .toList(),
-//               ),
-//               onTap: () => _addAnswer(index),
-//               onLongPress: () {},
-//             ),
-//             Divider(), // Add a divider for visual separation
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _buildDrawer(BuildContext context) {
-//     return Drawer(
-//       child: ListView(
-//         padding: EdgeInsets.zero,
-//         children: [
-//           DrawerHeader(
-//             decoration: BoxDecoration(
-//               color: Colors.blue,
-//             ),
-//             child: Text('Options'),
-//           ),
-//           ListTile(
-//             leading: Icon(Icons.question_answer_outlined),
-//             title: Text('QnA'),
-//             onTap: () {
-//               Navigator.pop(context);
-//             },
-//           ),
-//           ListTile(
-//             leading: Icon(Icons.logout),
-//             title: Text('Logout'),
-//             onTap: () {
-//               // Implement logout logic here
-//               Navigator.pop(context); // Close the drawer
-//             },
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   void _addQuestion() {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         String newQuestion = '';
-
-//         return AlertDialog(
-//           title: Text('Add a new question'),
-//           content: TextFormField(
-//             onChanged: (value) {
-//               newQuestion = value;
-//             },
-//             decoration: InputDecoration(labelText: 'Question'),
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () {
-//                 Navigator.pop(context);
-//               },
-//               child: Text('Cancel'),
-//             ),
-//             TextButton(
-//               onPressed: () {
-//                 setState(() {
-//                   qnaList.add(QnA(question: newQuestion));
-//                 });
-//                 Navigator.pop(context);
-//                 // Show a Snackbar
-//                 ScaffoldMessenger.of(context).showSnackBar(
-//                   SnackBar(
-//                     content: Text('Question added successfully'),
-//                     duration: Duration(seconds: 2),
-//                   ),
-//                 );
-//               },
-//               child: Text('Add'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   void _addAnswer(int index) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         String newAnswer = '';
-
-//         return AlertDialog(
-//           title: Text('Add an answer'),
-//           content: TextFormField(
-//             onChanged: (value) {
-//               newAnswer = value;
-//             },
-//             decoration: InputDecoration(labelText: 'Answer'),
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () {
-//                 Navigator.pop(context);
-//               },
-//               child: Text('Cancel'),
-//             ),
-//             TextButton(
-//               onPressed: () {
-//                 setState(() {
-//                   qnaList[index].addAnswer(newAnswer);
-//                 });
-//                 Navigator.pop(context);
-//               },
-//               child: Text('Add'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:travel_planner/models/qna_info.dart';
+import 'package:travel_planner/pages/answerQna.dart';
 import 'package:travel_planner/pages/home.dart';
 import 'package:travel_planner/pages/places_preview.dart';
+import 'package:travel_planner/pages/sign_in.dart';
 
 class QnaPage extends StatefulWidget {
   @override
@@ -226,16 +36,31 @@ class _QnaPageState extends State<QnaPage> {
           List<QnA> loadedQnA = [];
 
           data.forEach((key, value) {
-            loadedQnA.add(QnA.fromJson(value));
+            if (value is Map<String, dynamic>) {
+              // Check if the value has "question" key (indicating it's a QnA entry)
+              if (value.containsKey("question")) {
+                loadedQnA.add(QnA.fromJson(value));
+              } else if (value.containsKey("answers")) {
+                // Handle entries with nested "answers" key
+                var nestedData = value["answers"];
+                if (nestedData is Map<String, dynamic>) {
+                  // Process nested data here if needed
+                }
+              }
+            }
           });
 
           setState(() {
             qnaList = loadedQnA;
           });
+          print(
+              'QnA List Length: ${qnaList.length}'); // Check length of qnaList
+
           print('QnA List: $qnaList');
         }
       } else {
-        print('Error fetching QnA: ${response.reasonPhrase}');
+        print('No data received from Firebase.');
+        // print('Error fetching QnA: ${response.reasonPhrase}');
       }
     } catch (error) {
       print('Exception: $error');
@@ -343,16 +168,22 @@ class _QnaPageState extends State<QnaPage> {
           children: [
             ListTile(
               title: Text(qnaList[index].question),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: qnaList[index]
-                    .answers
-                    .map((answer) => Text(answer))
-                    .toList(),
-              ),
-              onTap: () => _addAnswerDialog(qnaList[index].id),
+              onTap: () => _showAnswersPage(qnaList[index]),
               onLongPress: () {},
             ),
+            if (qnaList[index].answers.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: qnaList[index]
+                      .answers
+                      .map((answer) => ListTile(
+                            title: Text(answer),
+                          ))
+                      .toList(),
+                ),
+              ),
             Divider(),
           ],
         );
@@ -382,11 +213,19 @@ class _QnaPageState extends State<QnaPage> {
             leading: Icon(Icons.logout),
             title: Text('Logout'),
             onTap: () {
-              // Implement logout logic here
-              Navigator.pop(context); // Close the drawer
+              _logout();
             },
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAnswersPage(QnA question) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnswerPage(question: question),
       ),
     );
   }
@@ -458,6 +297,27 @@ class _QnaPageState extends State<QnaPage> {
           ],
         );
       },
+    );
+  }
+
+  void _logout() {
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => LoginPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+      ),
+      (route) => false,
     );
   }
 }

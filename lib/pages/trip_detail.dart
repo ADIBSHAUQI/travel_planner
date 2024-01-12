@@ -8,8 +8,13 @@ import 'package:travel_planner/models/trip.dart';
 class TripDetailPage extends StatefulWidget {
   final Trip trip;
   final FullTrip fulltrip;
+  final Function(String) onDelete;
 
-  TripDetailPage({required this.trip, required this.fulltrip});
+  TripDetailPage({
+    required this.trip,
+    required this.fulltrip,
+    required this.onDelete,
+  });
 
   @override
   _TripDetailPageState createState() => _TripDetailPageState();
@@ -25,7 +30,8 @@ class _TripDetailPageState extends State<TripDetailPage> {
   @override
   void initState() {
     super.initState();
-    widget.fulltrip.details = []; // Initialize details list
+    widget.fulltrip.details = [];
+
     int numberOfDays =
         widget.trip.endDate.difference(widget.trip.startDate).inDays + 1;
     for (var i = 0; i < numberOfDays; i++) {
@@ -36,8 +42,19 @@ class _TripDetailPageState extends State<TripDetailPage> {
       costController.add(TextEditingController());
     }
 
-    // Load details from the database
-    _loadDetails();
+    _loadDetails().then((_) {
+      for (int index = 0; index < widget.fulltrip.details.length; index++) {
+        placeController[index].text =
+            widget.fulltrip.details[index].placeToStay;
+        transportationController[index].text =
+            widget.fulltrip.details[index].transportation;
+        destinationController[index].text =
+            widget.fulltrip.details[index].destination;
+        foodController[index].text = widget.fulltrip.details[index].food;
+        costController[index].text =
+            widget.fulltrip.details[index].cost.toString();
+      }
+    });
   }
 
   Future<void> _loadDetails() async {
@@ -114,48 +131,100 @@ class _TripDetailPageState extends State<TripDetailPage> {
             return Card(
               child: ListTile(
                 title: Text(DateFormat.yMMMd().format(currentDate)),
-                subtitle: Column(
+                subtitle: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      controller: placeController[index],
-                      decoration: InputDecoration(
-                        labelText: 'Place to Stay',
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
+                    // Left side text
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Place to stay:'),
+                        Divider(),
+                        Text('Transportation:'),
+                        Divider(),
+                        Text('Destination:'),
+                        Divider(),
+                        Text('Food:'),
+                        Divider(),
+                        Text('Cost:'),
+                        Divider(),
+                      ],
                     ),
-                    TextField(
-                      controller: transportationController[index],
-                      decoration: InputDecoration(
-                        labelText: 'Transportation',
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
-                    ),
-                    TextField(
-                      controller: destinationController[index],
-                      decoration: InputDecoration(
-                        labelText: 'Destination',
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
-                    ),
-                    TextField(
-                      controller: foodController[index],
-                      decoration: InputDecoration(
-                        labelText: 'Food',
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
-                    ),
-                    TextField(
-                      controller: costController[index],
-                      decoration: InputDecoration(
-                        labelText: 'Cost',
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
+                    // Right side EditableText
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 130,
+                          height: 30,
+                          child: EditableText(
+                            controller: placeController[index],
+                            readOnly: false,
+                            focusNode: FocusNode(),
+                            cursorColor: Colors.black,
+                            backgroundCursorColor: Colors.black,
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
+                            maxLines: 2,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 130,
+                          height: 30,
+                          child: EditableText(
+                            controller: transportationController[index],
+                            readOnly: false,
+                            focusNode: FocusNode(),
+                            cursorColor: Colors.black,
+                            backgroundCursorColor: Colors.black,
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
+                            maxLines: 2,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 130,
+                          height: 30,
+                          child: EditableText(
+                            controller: destinationController[index],
+                            readOnly: false,
+                            focusNode: FocusNode(),
+                            cursorColor: Colors.black,
+                            backgroundCursorColor: Colors.black,
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
+                            maxLines: 2,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 130,
+                          height: 30,
+                          child: EditableText(
+                            controller: foodController[index],
+                            readOnly: false,
+                            focusNode: FocusNode(),
+                            cursorColor: Colors.black,
+                            backgroundCursorColor: Colors.black,
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
+                            maxLines: 2,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 130,
+                          height: 30,
+                          child: EditableText(
+                            controller: costController[index],
+                            readOnly: false,
+                            focusNode: FocusNode(),
+                            cursorColor: Colors.black,
+                            backgroundCursorColor: Colors.black,
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
+                            maxLines: 2,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -167,16 +236,70 @@ class _TripDetailPageState extends State<TripDetailPage> {
     );
   }
 
+  void _editDetails(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Details'),
+          content: TextField(
+            controller: placeController[index],
+            decoration: InputDecoration(labelText: 'Place to stay'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Handle any additional logic for saving changes
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _saveChanges() async {
     // Ensure details property is initialized as a List
+    // for (int index = 0; index < costController.length; index++) {
+    //   widget.fulltrip.details.add(FullTrip(
+    //     placeToStay: placeController[index].text,
+    //     transportation: transportationController[index].text,
+    //     destination: destinationController[index].text,
+    //     food: foodController[index].text,
+    //     cost: double.parse(costController[index].text),
+    //   ));
+
+    // }
     for (int index = 0; index < costController.length; index++) {
-      widget.fulltrip.details.add(FullTrip(
+      FullTrip newDetails = FullTrip(
         placeToStay: placeController[index].text,
         transportation: transportationController[index].text,
         destination: destinationController[index].text,
         food: foodController[index].text,
         cost: double.parse(costController[index].text),
-      ));
+      );
+
+      // Update or add the new details to the list
+      if (index < widget.fulltrip.details.length) {
+        widget.fulltrip.details[index] = newDetails;
+      } else {
+        widget.fulltrip.details.add(newDetails);
+      }
+
+      // Update the corresponding TextEditingController values
+      placeController[index].text = newDetails.placeToStay;
+      transportationController[index].text = newDetails.transportation;
+      destinationController[index].text = newDetails.destination;
+      foodController[index].text = newDetails.food;
+      costController[index].text = newDetails.cost.toString();
     }
 
     // Save details to the database
@@ -225,7 +348,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
     }
   }
 
-  void _deleteTrip() {
+  void _deleteTrip() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -242,8 +365,10 @@ class _TripDetailPageState extends State<TripDetailPage> {
             TextButton(
               onPressed: () async {
                 // Perform deletion logic
-                await _deleteDetails();
-                Navigator.of(context).pop(); // Close the dialog
+                _handleDelete();
+
+                // Pass the deleted trip ID back to the home page
+                Navigator.of(context).pop(widget.trip.id);
               },
               child: Text('Delete'),
             ),
@@ -253,7 +378,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
     );
   }
 
-  Future<void> _deleteDetails() async {
+  void _handleDelete() async {
     try {
       final url = Uri.https(
         'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
@@ -268,5 +393,26 @@ class _TripDetailPageState extends State<TripDetailPage> {
     } catch (error) {
       print('Exception: $error');
     }
+
+    // Call the onDelete callback with the trip id
+    widget.onDelete(widget.trip.id);
+    Navigator.of(context).pop(); // Close the dialog
   }
+
+  // Future<void> _deleteDetails() async {
+  //   try {
+  //     final url = Uri.https(
+  //       'tabii-d8716-default-rtdb.asia-southeast1.firebasedatabase.app',
+  //       'trip_details/${widget.trip.id}.json',
+  //     );
+
+  //     final response = await http.delete(url);
+
+  //     if (response.statusCode != 200) {
+  //       print('Error: ${response.reasonPhrase}');
+  //     }
+  //   } catch (error) {
+  //     print('Exception: $error');
+  //   }
+  // }
 }
