@@ -30,12 +30,24 @@ class _AnswerPageState extends State<AnswerPage> {
       appBar: AppBar(
         title: Text('Answers for: ${widget.question.question}'),
       ),
-      body: Column(
-        children: [
-          Text('Answers Count: ${answers.length}'), // Add this line
-          _buildAnswerList(),
-          _buildAddAnswerForm(),
-        ],
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/gradient3.jpg"), //background image
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Color.fromARGB(255, 93, 93, 93), // Set background image opacity
+              BlendMode.overlay, // adjust the blend mode
+            ),
+          ),
+        ),
+        child: Column(
+          children: [
+            Text('Answers Count: ${answers.length}'), // Add this line
+            _buildAnswerList(),
+            _buildAddAnswerForm(),
+          ],
+        ),
       ),
     );
   }

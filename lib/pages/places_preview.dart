@@ -22,20 +22,20 @@ class PlacesPreviewPage extends StatelessWidget {
   ];
 
   final List<Color> cardColors = [
-    Colors.red,
-    Colors.orange,
-    Colors.yellow,
-    Colors.green,
-    Colors.teal,
-    Colors.blue,
-    Colors.indigo,
-    Colors.purple,
-    Colors.pink,
-    Colors.brown,
-    Colors.cyan,
-    Colors.amber,
-    Colors.deepOrange,
-    Colors.lime,
+    Color.fromARGB(255, 255, 158, 151),
+    Color.fromARGB(255, 255, 211, 144),
+    Color.fromARGB(255, 255, 243, 137),
+    Color.fromARGB(255, 172, 255, 175),
+    const Color.fromARGB(255, 183, 255, 248),
+    Color.fromARGB(255, 142, 204, 255),
+    Color.fromARGB(255, 156, 170, 250),
+    Color.fromARGB(255, 239, 145, 255),
+    Color.fromARGB(255, 255, 139, 177),
+    Color.fromARGB(255, 245, 162, 131),
+    Color.fromARGB(255, 141, 230, 242),
+    Color.fromARGB(255, 250, 213, 103),
+    Color.fromARGB(255, 255, 159, 129),
+    Color.fromARGB(255, 241, 255, 117),
   ];
 
   @override
@@ -45,33 +45,45 @@ class PlacesPreviewPage extends StatelessWidget {
         title: Text('Places Preview'),
       ),
       drawer: _buildDrawer(context),
-      body: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 8.0,
-          crossAxisSpacing: 8.0,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/gradient2.jpg"),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Color.fromARGB(255, 93, 93, 93),
+              BlendMode.overlay,
+            ),
+          ),
         ),
-        itemCount: placeCategories.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              _navigateToPlaceList(context, placeCategories[index]);
-            },
-            child: Card(
-              elevation: 2.0,
-              color: cardColors[index % cardColors.length],
-              child: Center(
-                child: Text(
-                  placeCategories[index],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8.0,
+            crossAxisSpacing: 8.0,
+          ),
+          itemCount: placeCategories.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                _navigateToPlaceList(context, placeCategories[index]);
+              },
+              child: Card(
+                elevation: 2.0,
+                color: cardColors[index % cardColors.length],
+                child: Center(
+                  child: Text(
+                    placeCategories[index],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
@@ -106,12 +118,24 @@ class PlacesPreviewPage extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              gradient: LinearGradient(
+                colors: [Colors.purple, Colors.pinkAccent],
+              ),
             ),
-            child: Text('Options'),
+            child: Text(
+              'Options',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           ListTile(
-            leading: Icon(Icons.question_answer_outlined),
+            leading: const Icon(
+              Icons.question_answer_outlined,
+              color: Colors.purpleAccent,
+            ),
             title: Text('QnA'),
             onTap: () {
               Navigator.push(
@@ -121,8 +145,13 @@ class PlacesPreviewPage extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.purpleAccent,
+            ),
+            title: const Text(
+              'Logout',
+            ),
             onTap: () {
               _logout(context);
             },

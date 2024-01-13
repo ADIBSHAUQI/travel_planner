@@ -16,15 +16,6 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false; // New variable for loading state
 
-  // String? _validateEmail(String? value) {
-  //   if (value == null || value.isEmpty) {
-  //     return 'Please enter your email';
-  //   }
-  //   if (!value.contains('@')) {
-  //     return 'Invalid email format';
-  //   }
-  //   return null;
-  // }
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your username';
@@ -107,57 +98,107 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Login"),
+        title: Text(
+          "Login",
+        ),
+        backgroundColor: Colors.purple,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: _validateUsername,
-                textInputAction:
-                    TextInputAction.next, // New line for UX enhancement
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: _validatePassword,
-                onFieldSubmitted: (_) => _login(context),
-              ),
-              SizedBox(height: 24),
-              _isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      child: Text('Login'),
-                      onPressed: () {
-                        _login(context);
-                      },
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/gradient1.jpg"), //background image
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Color.fromARGB(255, 93, 93, 93), // Set background image opacity
+              BlendMode.overlay, // adjust the blend mode
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    labelStyle:
+                        TextStyle(color: Colors.white), // Set label text color
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Colors.white), // Set border color
                     ),
-              TextButton(
-                child: Text('Don\'t have an account? Register here'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()),
-                  );
-                },
-              ),
-            ],
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Colors.white), // Set focused border color
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _validateUsername,
+                  textInputAction:
+                      TextInputAction.next, // New line for UX enhancement
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    labelStyle:
+                        TextStyle(color: Colors.white), // Set label text color
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Colors.white), // Set border color
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Colors.white), // Set focused border color
+                    ),
+                  ),
+                  obscureText: true,
+                  validator: _validatePassword,
+                  onFieldSubmitted: (_) => _login(context),
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 24),
+                _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple, //button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(10.0), //Round corners
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: () {
+                          _login(context);
+                        },
+                      ),
+                TextButton(
+                  child: Text(
+                    'Don\'t have an account? Register here',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

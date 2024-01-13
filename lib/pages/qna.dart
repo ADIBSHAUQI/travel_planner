@@ -129,7 +129,19 @@ class _QnaPageState extends State<QnaPage> {
         ],
       ),
       drawer: _buildDrawer(context),
-      body: _buildQnAList(),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/gradient2.jpg"),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Color.fromARGB(255, 93, 93, 93),
+              BlendMode.overlay,
+            ),
+          ),
+        ),
+        child: _buildQnAList(),
+      ),
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         child: Row(
@@ -166,10 +178,17 @@ class _QnaPageState extends State<QnaPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              title: Text(qnaList[index].question),
-              onTap: () => _showAnswersPage(qnaList[index]),
-              onLongPress: () {},
+            Card(
+              elevation: 3.0,
+              margin: EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                title: Text(
+                  qnaList[index].question,
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                onTap: () => _showAnswersPage(qnaList[index]),
+                onLongPress: () {},
+              ),
             ),
             if (qnaList[index].answers.isNotEmpty)
               Padding(
@@ -178,13 +197,19 @@ class _QnaPageState extends State<QnaPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: qnaList[index]
                       .answers
-                      .map((answer) => ListTile(
-                            title: Text(answer),
+                      .map((answer) => Card(
+                            elevation: 3.0,
+                            margin: EdgeInsets.symmetric(vertical: 8.0),
+                            child: ListTile(
+                              title: Text(
+                                answer,
+                                style: Theme.of(context).textTheme.bodyText1,
+                              ),
+                            ),
                           ))
                       .toList(),
                 ),
               ),
-            Divider(),
           ],
         );
       },
@@ -196,22 +221,37 @@ class _QnaPageState extends State<QnaPage> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              gradient: LinearGradient(
+                colors: [Colors.purple, Colors.pinkAccent],
+              ),
             ),
-            child: Text('Options'),
+            child: Text(
+              'Options',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           ListTile(
-            leading: Icon(Icons.question_answer_outlined),
+            leading: const Icon(
+              Icons.question_answer_outlined,
+              color: Colors.purpleAccent,
+            ),
             title: Text('QnA'),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.purpleAccent,
+            ),
+            title: const Text('Logout'),
             onTap: () {
               _logout();
             },

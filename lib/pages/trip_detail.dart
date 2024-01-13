@@ -90,52 +90,64 @@ class _TripDetailPageState extends State<TripDetailPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: numberOfDays,
-          itemBuilder: (context, index) {
-            final currentDate =
-                widget.trip.startDate.add(Duration(days: index));
-            final fullTrip = widget.fulltrip.details.length > index
-                ? widget.fulltrip.details[index]
-                : FullTrip(
-                    placeToStay: '',
-                    transportation: '',
-                    destination: '',
-                    food: '',
-                    cost: 0.0,
-                  );
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/gradient3.jpg"), //background image
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Color.fromARGB(255, 93, 93, 93), // Set background image opacity
+              BlendMode.overlay, // adjust the blend mode
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView.builder(
+            itemCount: numberOfDays,
+            itemBuilder: (context, index) {
+              final currentDate =
+                  widget.trip.startDate.add(Duration(days: index));
+              final fullTrip = widget.fulltrip.details.length > index
+                  ? widget.fulltrip.details[index]
+                  : FullTrip(
+                      placeToStay: '',
+                      transportation: '',
+                      destination: '',
+                      food: '',
+                      cost: 0.0,
+                    );
 
-            return Card(
-              child: ListTile(
-                title: Text(DateFormat.yMMMd().format(currentDate)),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildListTile(
-                        title: 'Place to stay',
-                        data: fullTrip.placeToStay,
-                        index: index),
-                    _buildListTile(
-                        title: 'Transportation',
-                        data: fullTrip.transportation,
-                        index: index),
-                    _buildListTile(
-                        title: 'Destination',
-                        data: fullTrip.destination,
-                        index: index),
-                    _buildListTile(
-                        title: 'Food', data: fullTrip.food, index: index),
-                    _buildListTile(
-                        title: 'Cost',
-                        data: fullTrip.cost.toString(),
-                        index: index),
-                  ],
+              return Card(
+                child: ListTile(
+                  title: Text(DateFormat.yMMMd().format(currentDate)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildListTile(
+                          title: 'Place to stay',
+                          data: fullTrip.placeToStay,
+                          index: index),
+                      _buildListTile(
+                          title: 'Transportation',
+                          data: fullTrip.transportation,
+                          index: index),
+                      _buildListTile(
+                          title: 'Destination',
+                          data: fullTrip.destination,
+                          index: index),
+                      _buildListTile(
+                          title: 'Food', data: fullTrip.food, index: index),
+                      _buildListTile(
+                          title: 'Cost',
+                          data: fullTrip.cost.toString(),
+                          index: index),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

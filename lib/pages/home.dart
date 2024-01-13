@@ -7,7 +7,6 @@ import 'package:travel_planner/pages/places_preview.dart';
 import 'package:travel_planner/pages/qna.dart';
 import 'package:travel_planner/pages/sign_in.dart';
 import 'package:travel_planner/pages/trip_detail.dart';
-import 'package:travel_planner/widgets/custom_icon_button.dart';
 import 'package:travel_planner/models/trip.dart';
 import 'package:travel_planner/pages/new_trip.dart';
 
@@ -79,59 +78,85 @@ class _HomePageState extends State<HomePage> {
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("TABII"),
+            Text(
+              "TABII",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+              ),
+            ),
           ],
         ),
       ),
       drawer: _buildDrawer(),
-      body: ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(14),
-        itemCount: _trips.length,
-        itemBuilder: (context, index) {
-          final trip = _trips[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TripDetailPage(
-                    trip: trip,
-                    fulltrip: FullTrip(
-                      placeToStay: '',
-                      transportation: '',
-                      destination: '',
-                      food: '',
-                      cost: 0.0,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/gradient2.jpg"), //background image
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Color.fromARGB(255, 93, 93, 93), // Set background image opacity
+              BlendMode.overlay, // adjust the blend mode
+            ),
+          ),
+        ),
+        child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(14),
+          itemCount: _trips.length,
+          itemBuilder: (context, index) {
+            final trip = _trips[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TripDetailPage(
+                      trip: trip,
+                      fulltrip: FullTrip(
+                        placeToStay: '',
+                        transportation: '',
+                        destination: '',
+                        food: '',
+                        cost: 0.0,
+                      ),
+                      onDelete: _handleTripDeletion,
                     ),
-                    onDelete: _handleTripDeletion,
+                  ),
+                ).then((result) {
+                  // Handle any result if needed
+                });
+              },
+              child: Card(
+                elevation: 3.0,
+                margin: EdgeInsets.symmetric(vertical: 8.0),
+                child: ListTile(
+                  title: Text(
+                    trip.place,
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ' ${DateFormat.yMMMd().format(trip.startDate)} - ${DateFormat.yMMMd().format(trip.endDate)}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ).then((result) {
-                // Handle any result if needed
-              });
-            },
-            child: ListTile(
-              title: Text(
-                trip.place,
-                style: Theme.of(context).textTheme.bodyText1,
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    ' ${DateFormat.yMMMd().format(trip.startDate)} - ${DateFormat.yMMMd().format(trip.endDate)}',
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: _addingToDo,
-      ),
+          child: Icon(Icons.add),
+          onPressed: _addingToDo,
+          backgroundColor: Colors.purple),
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         child: Row(
@@ -140,7 +165,7 @@ class _HomePageState extends State<HomePage> {
             IconButton(
               icon: Icon(Icons.home),
               onPressed: () {
-                // Handle the "Home" button tap
+                //default home page
               },
             ),
             IconButton(
@@ -163,14 +188,26 @@ class _HomePageState extends State<HomePage> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              gradient: LinearGradient(
+                colors: [Colors.purple, Colors.pinkAccent],
+              ),
             ),
-            child: Text('Options'),
+            child: Text(
+              'Options',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           ListTile(
-            leading: Icon(Icons.question_answer_outlined),
+            leading: const Icon(
+              Icons.question_answer_outlined,
+              color: Colors.purpleAccent,
+            ),
             title: Text('QnA'),
             onTap: () {
               Navigator.push(
@@ -180,7 +217,10 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.logout),
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.purpleAccent,
+            ),
             title: Text('Logout'),
             onTap: () {
               _logout();
