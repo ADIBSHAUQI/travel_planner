@@ -1,6 +1,6 @@
-# travel_planner
+# TABII - Smart Travel Planner App
 
-A new Flutter project.
+A smart travel planner application that based in Malaysia.
 
 ## Getting Started
 
